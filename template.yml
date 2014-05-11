@@ -1,0 +1,7 @@
+default:
+    template: test#1test#2
+    replace:
+        - "#1"
+        - "#2"
+    csvFileName: test.csv
+    csvFileName: tst.txt
