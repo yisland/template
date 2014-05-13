@@ -4,5 +4,5 @@ default:
         - "#1"
         - "#2"
     csvFileName: test.csv
-    outputFileName: tst.txt
+    outputFileName: ./tmp/tst.txt
     lowOrUpCase: up

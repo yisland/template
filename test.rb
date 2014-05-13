@@ -1,12 +1,13 @@
 require 'yaml'
 require 'csv'
+require 'fileutils'
 
 TEMPLATE = YAML.load_file("template.yml")
 
 TMPVAL = TEMPLATE["default"]["template"]
 REPARRAY = TEMPLATE["default"]["replace"]
 TMPFILENAME = TEMPLATE["default"]["csvFileName"]
-OUTFILENAME = Dir::pwd + File::SEPARATOR + TEMPLATE["default"]["outputFileName"]
+OUTFILENAME = TEMPLATE["default"]["outputFileName"]
 LOWORUPCASE = TEMPLATE["default"]["lowOrUpCase"]
 
 outArray = []
@@ -26,6 +27,7 @@ CSV.foreach(TMPFILENAME, { :encoding => "UTF-8"}) do |row|
     outArray.push tmp
 end
 
+FileUtils.mkdir_p(File::dirname(OUTFILENAME)) unless FileTest.exists?(OUTFILENAME)
 File.open(OUTFILENAME, 'w') do |f|
     outArray.each do |item|
         f.write item + "\n"
