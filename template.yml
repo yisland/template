@@ -6,3 +6,4 @@ default:
     csvFileName: test.csv
     outputFileName: ./tmp/tst.txt
     lowOrUpCase: up
+    stripCase: false
