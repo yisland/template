@@ -2,35 +2,49 @@ require 'yaml'
 require 'csv'
 require 'fileutils'
 
-TEMPLATE = YAML.load_file("template.yml")
+SETTING = YAML.load_file("setting.yml")
 
-TMPVAL = TEMPLATE["default"]["template"]
-REPARRAY = TEMPLATE["default"]["replace"]
-TMPFILENAME = TEMPLATE["default"]["csvFileName"]
-OUTFILENAME = TEMPLATE["default"]["outputFileName"]
-LOWORUPCASE = TEMPLATE["default"]["lowOrUpCase"]
-STRIPCASE = TEMPLATE["default"]["stripCase"]
+TMPFILEPATH = SETTING["default"]["templateFile"]
+REPARRAY = SETTING["default"]["replace"]
+CSVFILENAME = SETTING["default"]["csvFileName"]
+OUTFILENAME = SETTING["default"]["outputFileName"]
+FOMATTER = SETTING["default"]["fomatter"]
+STRIPCASE = SETTING["default"]["stripCase"]
 
 outArray = []
+csvArray = []
 
-CSV.foreach(TMPFILENAME, { :encoding => "UTF-8"}) do |row|
-    i = 0
-    tmp = TMPVAL
-    row.each do |column|
-        # 大文字・小文字変換
-        if LOWORUPCASE == "lower" then
-            column.downcase!
-        elsif LOWORUPCASE == "up" then
-            column.upcase!
+File.open(CSVFILENAME).each do |csv|
+    csvArray.push csv
+end
+
+i = 0
+csvArray.each do
+    csvColumn = csvArray[i].split(",")
+    File.open(TMPFILEPATH) do |row|
+        tmp = row.read
+
+        j = 0
+        csvColumn.each do |word|
+            # 大文字・小文字変換
+            if FOMATTER == "lower" then
+                word.downcase!
+            elsif FOMATTER == "up" then
+                word.upcase!
+            elsif FOMATTER == "cap" then
+                word.capitalize!
+            end
+
+            # 空白削除
+            word.strip! if STRIPCASE
+
+            tmp.gsub!(REPARRAY[j], word)
+            j += 1
         end
-
-        # 空白削除
-        column.strip! if STRIPCASE
-
-        tmp = tmp.gsub(REPARRAY[i], column)
-        i += 1
+        
+        outArray.push tmp
     end
-    outArray.push tmp
+    i += 1
 end
 
 FileUtils.mkdir_p(File::dirname(OUTFILENAME)) unless FileTest.exists?(OUTFILENAME)
