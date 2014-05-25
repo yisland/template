@@ -14,39 +14,50 @@ STRIPCASE = SETTING["default"]["stripCase"]
 outArray = []
 csvArray = []
 
-File.open(CSVFILENAME).each do |csv|
-    csvArray.push csv
-end
+begin
+    File.open(CSVFILENAME).each do |csv|
+        csvArray.push csv
+    end
 
-i = 0
-csvArray.each do
-    csvColumn = csvArray[i].split(",")
-    File.open(TMPFILEPATH) do |row|
-        tmp = row.read
+    i = 0
+    csvArray.each do
+        csvColumn = csvArray[i].split(",")
+        File.open(TMPFILEPATH) do |row|
+            tmp = row.read
+            # テンプレートファイルが空の場合
+            break if tmp.chomp.empty?
 
-        j = 0
-        csvColumn.each do |word|
-            # 大文字・小文字変換
-            if FOMATTER == "lower" then
-                word.downcase!
-            elsif FOMATTER == "up" then
-                word.upcase!
-            elsif FOMATTER == "cap" then
-                word.capitalize!
+            j = 0
+            csvColumn.each do |word|
+                # 大文字・小文字変換
+                if FOMATTER == "lower" then
+                    word.downcase!
+                elsif FOMATTER == "up" then
+                    word.upcase!
+                elsif FOMATTER == "cap" then
+                    word.capitalize!
+                end
+
+                # 空白削除
+                word.strip! if STRIPCASE
+
+                tmp.gsub!(REPARRAY[j], word)
+                j += 1
             end
 
-            # 空白削除
-            word.strip! if STRIPCASE
-
-            tmp.gsub!(REPARRAY[j], word)
-            j += 1
+            outArray.push tmp
         end
-        
-        outArray.push tmp
+        i += 1
     end
-    i += 1
+rescue => ex
+    puts ex
+    exit
 end
 
+if outArray.length() == 0 then
+    puts "templateFile empty"
+    exit
+end
 FileUtils.mkdir_p(File::dirname(OUTFILENAME)) unless FileTest.exists?(OUTFILENAME)
 File.open(OUTFILENAME, 'w') do |f|
     outArray.each do |item|
